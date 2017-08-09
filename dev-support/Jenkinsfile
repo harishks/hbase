@@ -360,6 +360,9 @@ END
     always {
       script {
          sh "printenv"
+         for ( issue in jiraIssueSelector() ) {
+           echo issue
+         }
       }
     }
   }
