@@ -360,15 +360,36 @@ END
     always {
       script {
          sh "printenv"
+         def results = ["${env.OUTPUT_RELATIVE_GENERAL}/failure", "${env.OUTPUT_RELATIVE_GENERAL}/success",
+                        "${env.OUTPUT_RELATIVE_JDK7}/failure", "${env.OUTPUT_RELATIVE_JDK7}/success",
+                        "${env.OUTPUT_RELATIVE_JDK8}/failure", "${env.OUTPUT_RELATIVE_JDK8}/success",
+                        'src_tarball_failure', 'src_tarball_success']
          echo env.BRANCH_NAME
          echo env.BUILD_URL
          echo currentBuild.result
          echo currentBuild.durationString
-         for ( change in changeSets ) {
+         def comment = "Results for branch ${env.BRANCH_NAME}, done in ${currentBuild.durationString}\n"
+         if (currentBuild.result == "SUCCESS") {
+            comment += '	(/) *{color:green}+1 overall{color}*\n'
+         } else {
+            comment += '(x) *{color:red}-1 overall{color}* \n'
+            // Ideally get the committer our of the change and @ mention them in the per-jira comment
+            comment += 'Committer, please check your recent inclusion of a patch for this issue.\n'
+         }
+         comment += "	[build ${currentBuild.displayName} on builds.a.o|${env.BUILD_URL]\n----\ndetails (if available):"
+         comment += results.collect { fileExists(file: it) ? readFile(file: it) : "" }.join
+         echo comment
+         echo "${currentBuild.changeSets.size} changes"
+         for ( change in currentBuild.changeSets ) {
            echo "change:"
            echo "	${change.getAuthor}"
            echo "	${change.getMsg}"
            echo "	${change.getMsgAnnotated}"
+           echo ""
+           // figure out jira  from the message
+           // dedup jiras we already commented on
+           // comment, something like
+           // jiraComment issueKey: currentIssue, body: comment
          }
       }
     }
