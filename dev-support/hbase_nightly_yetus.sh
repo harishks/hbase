@@ -16,6 +16,9 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# fail fast
+exit 1772
+
 declare -i missing_env=0
 # Validate params
 for required_env in "TESTS" "TOOLS" "BASEDIR" "ARCHIVE_PATTERN_LIST" "OUTPUT_RELATIVE" \
