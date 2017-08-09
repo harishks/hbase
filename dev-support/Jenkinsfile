@@ -377,6 +377,10 @@ END
             comment += 'Committer, please check your recent inclusion of a patch for this issue.\\'
          }
          comment += "	[build ${currentBuild.displayName} on builds.a.o|${env.BUILD_URL}]: ${currentBuild.result}\\----\\details (if available):"
+         echo "Comment so far: "
+         echo comment
+         echo ""
+         echo "trying to aggregate step-wise results"
          comment += results.collect { fileExists(file: it) ? readFile(file: it) : "\n" }.join
          echo comment
          echo "${currentBuild.changeSets.size} changes"
