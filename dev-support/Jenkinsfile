@@ -128,7 +128,17 @@ curl -L  -o personality.sh "${env.PROJET_PERSONALITY}"
       steps {
         unstash 'yetus'
         // TODO should this be a download from master, similar to how the personality is?
-        sh "${env.BASEDIR}/dev-support/hbase_nightly_yetus.sh"
+        sh """
+        declare commentfile
+        if "${env.BASEDIR}/dev-support/hbase_nightly_yetus.sh" ; then
+          commentfile='${env.OUTPUTDIR}/success'
+          echo '(/) *{color:green}+1 general checks{color}*' >> "${commentfile}"
+        else
+          commentfile='${env.OUTPUTDIR}/failure'
+          echo '(x) *{color:red}-1 general checks{color}*' >> "${commentfile}"
+        fi
+        echo '-- For more information [see general report|${env.BUILD_URL}/General_Nightly_Build_Report/]' >> "${commentfile}"
+"""
       }
       post {
         always {
@@ -164,7 +174,16 @@ curl -L  -o personality.sh "${env.PROJET_PERSONALITY}"
           if [ "${env.BRANCH_NAME}" == "branch-1.1" ]; then
             TESTS+=",findbugs"
           fi
-          "${env.BASEDIR}/dev-support/hbase_nightly_yetus.sh"
+          declare commentfile
+          if "${env.BASEDIR}/dev-support/hbase_nightly_yetus.sh" ; then
+            commentfile='${env.OUTPUTDIR}/success'
+            echo '(/) *{color:green}+1 jdk7 checks{color}*' >> "${commentfile}"
+          else
+            commentfile='${env.OUTPUTDIR}/failure'
+            echo '(x) *{color:red}-1 jdk7 checks{color}*' >> "${commentfile}"
+          fi
+          echo '-- For more information [see jdk7 report|${env.BUILD_URL}/JDK7_Nightly_Build_Report/]' >> "${commentfile}"
+"""
         """
       }
       post {
@@ -215,7 +234,17 @@ curl -L  -o personality.sh "${env.PROJET_PERSONALITY}"
       }
       steps {
         unstash 'yetus'
-        sh "${env.BASEDIR}/dev-support/hbase_nightly_yetus.sh"
+        sh """
+          declare commentfile
+          if "${env.BASEDIR}/dev-support/hbase_nightly_yetus.sh" ; then
+            commentfile='${env.OUTPUTDIR}/success'
+            echo '(/) *{color:green}+1 jdk8 checks{color}*' >> "${commentfile}"
+          else
+            commentfile='${env.OUTPUTDIR}/failure'
+            echo '(x) *{color:red}-1 jdk8 checks{color}*' >> "${commentfile}"
+          fi
+          echo '-- For more information [see jdk8 report|${env.BUILD_URL}/JDK8_Nightly_Build_Report/]' >> "${commentfile}"
+"""
       }
       post {
         always {
@@ -303,6 +332,35 @@ END
             echo "Everything looks as expected."
           fi
 '''
+      }
+      // This approach only works because the source release artifact is the last stage that does work.
+      post {
+        success {
+          writeFile file: "${env.WORKSPACE}/src_tarball_success", text: '(/) *{color:green}+1 source release artifact{color}*'
+        }
+        failure {
+          writeFile file: "${env.WORKSPACE}/src_tarball_failure", text: '(x) *{color:red}-1 source release artifact{color}*'
+        }
+      }
+    }
+    stage ('Fail if previous stages failed') {
+      steps {
+        script {
+          def failures = ['src_tarball_failure', "${env.OUTPUT_RELATIVE_GENERAL}/failure",
+                          "${env.OUTPUT_RELATIVE_JDK7}/failure", "${OUTPUT_RELATIVE_JDK8}/failure"]
+          for ( failure_file in failures ) {
+            if (fileExists(file: failure_file)) {
+              error 'Failing job due to previous failure(s) in prior steps.'
+            }
+          }
+        }
+      }
+    }
+  }
+  post {
+    always {
+      script {
+         sh "printenv"
       }
     }
   }
