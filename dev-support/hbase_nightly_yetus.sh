@@ -17,6 +17,7 @@
 # under the License.
 
 # fail fast
+echo "placeholder" >> "${OUTPUTDIR}/console-report.html"
 exit 1772
 
 declare -i missing_env=0
