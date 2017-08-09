@@ -128,7 +128,7 @@ curl -L  -o personality.sh "${env.PROJET_PERSONALITY}"
       steps {
         unstash 'yetus'
         // TODO should this be a download from master, similar to how the personality is?
-        sh '''!#/usr/bin/env bash
+        sh '''#!/usr/bin/env bash
           declare commentfile
           if "${BASEDIR}/dev-support/hbase_nightly_yetus.sh" ; then
             commentfile='${OUTPUTDIR}/success'
