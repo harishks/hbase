@@ -360,8 +360,15 @@ END
     always {
       script {
          sh "printenv"
-         for ( issue in jiraIssueSelector() ) {
-           echo issue
+         echo env.BRANCH_NAME
+         echo env.BUILD_URL
+         echo currentBuild.result
+         echo currentBuild.durationString
+         for ( change in changeSets ) {
+           echo "change:"
+           echo "	${change.getAuthor}"
+           echo "	${change.getMsg}"
+           echo "	${change.getMsgAnnotated}"
          }
       }
     }
