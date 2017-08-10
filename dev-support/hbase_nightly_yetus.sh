@@ -17,6 +17,7 @@
 # under the License.
 
 # fail fast
+mkdir -p "${OUTPUTDIR}"
 echo "placeholder" >> "${OUTPUTDIR}/console-report.html"
 exit 1772
 

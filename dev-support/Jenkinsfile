@@ -131,10 +131,10 @@ curl -L  -o personality.sh "${env.PROJET_PERSONALITY}"
         sh '''#!/usr/bin/env bash
           declare commentfile
           if "${BASEDIR}/dev-support/hbase_nightly_yetus.sh" ; then
-            commentfile='${OUTPUTDIR}/success'
+            commentfile="${OUTPUTDIR}/success"
             echo '(/) *{color:green}+1 general checks{color}*' >> "${commentfile}"
           else
-            commentfile='${OUTPUTDIR}/failure'
+            commentfile="${OUTPUTDIR}/failure"
             echo '(x) *{color:red}-1 general checks{color}*' >> "${commentfile}"
           fi
           echo '-- For more information [see general report|${BUILD_URL}/General_Nightly_Build_Report/]' >> "${commentfile}"
